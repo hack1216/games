@@ -118,6 +118,12 @@ input::placeholder { color: var(--muted); }
 .uno-card.sm .center-val { font-size: 1.1rem; }
 .uno-card.sm .corner { font-size: 0.4rem; }
 
+/* Suit colors */
+.suit-hearts { background: linear-gradient(135deg, #c0392b, #e74c3c); color: #fff; }
+.suit-diamonds { background: linear-gradient(135deg, #d4ac0d, #f1c40f); color: #111; }
+.suit-clubs { background: linear-gradient(135deg, #1e8449, #27ae60); color: #fff; }
+.suit-spades { background: linear-gradient(135deg, #1a5276, #2980b9); color: #fff; }
+
 /* ── Dealer / Blackjack ── */
 .dealer-area { text-align: center; }
 
