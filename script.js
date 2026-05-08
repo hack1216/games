@@ -32,17 +32,14 @@ function renderCard(card, small = false) {
   if (!card || card.hidden) {
     return `<div class="uno-card${small ? ' sm' : ''} hidden-card">🂠</div>`;
   }
-  const sClass = SUIT_CLASS[card.suit] || '';
+
   const val = unoValue(card.value);
-  const sym = unoSuitSymbol(card.suit);
+
   return `
-    <div class="uno-card${small ? ' sm' : ''} ${sClass}">
-      <span class="corner tl">${val}<br/>${sym}</span>
+    <div class="uno-card${small ? ' sm' : ''}">
       <span class="center-val">${val}</span>
-      <span class="corner br">${val}<br/>${sym}</span>
     </div>`;
 }
-
 // ─── Screen Management ────────────────────────────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -178,9 +175,39 @@ function renderPoker(room) {
   }
 
   // Opponents
-  const oppRow = document.getElementById('poker-opponents');
-  oppRow.innerHTML = '';
-  room.players.filter(p => p.id !== myId).forEach((p, i) => {
+  const opponents = room.players.filter(p => p.id !== myId);
+const container = document.getElementById('poker-opponents');
+
+container.innerHTML = '';
+
+const total = opponents.length;
+const radius = 42; // how far from center (percentage)
+const centerX = 50;
+const centerY = 50;
+
+opponents.forEach((p, i) => {
+  const angle = (i / total) * 2 * Math.PI;
+
+  const x = centerX + radius * Math.cos(angle);
+  const y = centerY + radius * Math.sin(angle);
+
+  const div = document.createElement('div');
+  div.className = 'opponent-card';
+
+  // important: absolute positioning around circle
+  div.style.position = 'absolute';
+  div.style.left = x + '%';
+  div.style.top = y + '%';
+  div.style.transform = 'translate(-50%, -50%)';
+
+  div.innerHTML = `
+    <div class="opp-name">${p.name}</div>
+    <div class="opp-chips">💰 ${p.chips}</div>
+    <div class="opp-bet">${p.folded ? 'Folded' : ''}</div>
+  `;
+
+  container.appendChild(div);
+});
     const isActive = room.players.indexOf(p) === room.currentTurn;
     const div = document.createElement('div');
     div.className = `opponent-card${isActive ? ' active-turn' : ''}${p.folded ? ' folded' : ''}`;
