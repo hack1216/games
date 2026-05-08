@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNO Cards Casino</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- SCREENS -->
+  <div id="screen-home" class="screen active">
+    <div class="home-container">
+      <div class="logo">🃏 UNO CASINO</div>
+      <p class="tagline">Poker & Blackjack with UNO Style Cards</p>
+      <div class="home-buttons">
+        <button class="btn btn-primary" onclick="showScreen('screen-create')">Create Room</button>
+        <button class="btn btn-secondary" onclick="showScreen('screen-join')">Join Room</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-create" class="screen">
+    <div class="form-container">
+      <h2>Create Room</h2>
+      <input type="text" id="create-name" placeholder="Your Name" maxlength="16" />
+      <div class="game-choice">
+        <button class="btn game-btn active" data-game="poker" onclick="selectGame('poker', this)">🂡 Texas Hold'em</button>
+        <button class="btn game-btn" data-game="blackjack" onclick="selectGame('blackjack', this)">🃑 Blackjack</button>
+      </div>
+      <button class="btn btn-primary" onclick="createRoom()">Create Room</button>
+      <button class="btn btn-ghost" onclick="showScreen('screen-home')">Back</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="screen">
+    <div class="form-container">
+      <h2>Join Room</h2>
+      <input type="text" id="join-name" placeholder="Your Name" maxlength="16" />
+      <input type="text" id="join-code" placeholder="Room Code" maxlength="6" style="text-transform:uppercase" />
+      <button class="btn btn-primary" onclick="joinRoom()">Join Room</button>
+      <button class="btn btn-ghost" onclick="showScreen('screen-home')">Back</button>
+    </div>
+  </div>
+
+  <div id="screen-lobby" class="screen">
+    <div class="lobby-container">
+      <h2>Lobby</h2>
+      <div class="room-code-display">
+        Room Code: <span id="lobby-code">------</span>
+        <button class="btn-copy" onclick="copyCode()">Copy</button>
+      </div>
+      <div id="lobby-players" class="lobby-players"></div>
+      <div id="lobby-host-controls" class="lobby-controls hidden">
+        <p class="lobby-hint">Waiting for players... (min 2, max 4)</p>
+        <div class="lobby-btns">
+          <button class="btn btn-primary" id="btn-add-bots" onclick="addBots()">🤖 Add Bots & Start</button>
+          <button class="btn btn-secondary" id="btn-start-game" onclick="startGame()">▶ Start with Players</button>
+        </div>
+      </div>
+      <p id="lobby-guest-msg" class="lobby-hint hidden">Waiting for host to start the game...</p>
+    </div>
+  </div>
+
+  <div id="screen-game" class="screen">
+    <!-- POKER GAME -->
+    <div id="poker-table" class="game-table hidden">
+      <div class="table-header">
+        <div class="game-title">🂡 Texas Hold'em</div>
+        <div class="pot-display">POT: <span id="poker-pot">0</span> chips</div>
+        <div class="phase-display" id="poker-phase"></div>
+      </div>
+      <div class="opponents-row" id="poker-opponents"></div>
+      <div class="community-area">
+        <div class="community-label">Community Cards</div>
+        <div id="community-cards" class="card-row"></div>
+      </div>
+      <div class="player-area">
+        <div id="poker-log" class="game-log"></div>
+        <div id="my-hole-cards" class="card-row"></div>
+        <div class="player-info-bar">
+          <span id="my-poker-name" class="player-name-tag"></span>
+          <span id="my-poker-chips" class="chip-count"></span>
+          <span id="my-poker-bet" class="bet-info"></span>
+        </div>
+        <div id="poker-actions" class="action-bar hidden">
+          <button class="btn btn-danger" onclick="pokerAction('fold')">Fold</button>
+          <button class="btn btn-warning" id="btn-check" onclick="pokerAction('check')">Check</button>
+          <button class="btn btn-info" id="btn-call" onclick="pokerAction('call')">Call</button>
+          <div class="raise-group">
+            <input type="number" id="raise-amount" placeholder="Amount" min="1" />
+            <button class="btn btn-success" onclick="pokerAction('raise')">Raise</button>
+          </div>
+          <button class="btn btn-primary" onclick="pokerAction('allIn')">All In 🔥</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLACKJACK GAME -->
+    <div id="blackjack-table" class="game-table hidden">
+      <div class="table-header">
+        <div class="game-title">🃑 Blackjack</div>
+        <div class="phase-display" id="bj-phase"></div>
+      </div>
+      <div class="dealer-area">
+        <div class="dealer-label">Dealer <span id="dealer-score"></span></div>
+        <div id="dealer-cards" class="card-row"></div>
+      </div>
+      <div class="bj-opponents" id="bj-opponents"></div>
+      <div class="player-area">
+        <div id="bj-log" class="game-log"></div>
+        <div id="my-bj-cards" class="card-row"></div>
+        <div class="player-info-bar">
+          <span id="my-bj-name" class="player-name-tag"></span>
+          <span id="my-bj-chips" class="chip-count"></span>
+          <span id="my-bj-score" class="bet-info"></span>
+        </div>
+        <div id="bj-bet-controls" class="action-bar hidden">
+          <div class="bet-group">
+            <span class="bet-label">Place Bet:</span>
+            <button class="chip-btn" onclick="addBet(10)">+10</button>
+            <button class="chip-btn" onclick="addBet(25)">+25</button>
+            <button class="chip-btn" onclick="addBet(50)">+50</button>
+            <button class="chip-btn" onclick="addBet(100)">+100</button>
+            <span id="current-bet-display" class="current-bet">Bet: 0</span>
+          </div>
+          <button class="btn btn-primary" onclick="placeBet()">Place Bet ✓</button>
+          <button class="btn btn-ghost" onclick="clearBet()">Clear</button>
+        </div>
+        <div id="bj-actions" class="action-bar hidden">
+          <button class="btn btn-success" onclick="bjAction('hit')">Hit 🃏</button>
+          <button class="btn btn-warning" onclick="bjAction('stand')">Stand ✋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Winner Popup -->
+  <div id="winner-popup" class="winner-overlay hidden">
+    <div class="winner-box">
+      <div class="winner-title">🏆 Round Over!</div>
+      <div id="winner-content"></div>
+    </div>
+  </div>
+
+  <!-- Error Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
