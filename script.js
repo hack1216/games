@@ -2,7 +2,7 @@
 // IMPORTANT: Replace with your Render backend URL after deploying
 const SERVER_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:3000'
-  : 'http://localhost:3000';
+  : 'https://games-ql8x.onrender.com';
 
 const socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 
