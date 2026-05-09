@@ -1,7 +1,7 @@
 // ─── Config ────────────────────────────────────────────────────────────────────
 const SERVER_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:3000'
-  : 'https://YOUR-RENDER-APP-NAME.onrender.com';
+  : 'https://games-ql8x.onrender.com';
 
 const socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 
