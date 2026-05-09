@@ -13,36 +13,16 @@ let roomState = null;
 let isHost = false;
 let winnerTimeout = null;
 
-// ─── CHEAT STATE ───────────────────────────────────────────────────────────────
+// ─── CHEAT (ONLY ADDITION) ─────────────────────────────────────────────────────
 let cheatBuffer = '';
 let cheatRevealCards = false;
 
 // ─── UNO Card Rendering ────────────────────────────────────────────────────────
-const SUIT_CLASS = {
-  hearts: 'suit-hearts',
-  diamonds: 'suit-diamonds',
-  clubs: 'suit-clubs',
-  spades: 'suit-spades'
-};
+const SUIT_CLASS = { hearts: 'suit-hearts', diamonds: 'suit-diamonds', clubs: 'suit-clubs', spades: 'suit-spades' };
+const SUIT_SYM   = { hearts: '♥', diamonds: '◆', clubs: '♣', spades: '♠' };
+const VAL_MAP    = { 'A': '1', '10': '0', 'J': '⟲', 'Q': '⊘', 'K': '+2' };
 
-const SUIT_SYM = {
-  hearts: '♥',
-  diamonds: '◆',
-  clubs: '♣',
-  spades: '♠'
-};
-
-const VAL_MAP = {
-  'A': '1',
-  '10': '0',
-  'J': '⟲',
-  'Q': '⊘',
-  'K': '+2'
-};
-
-function unoVal(v) {
-  return VAL_MAP[v] || v;
-}
+function unoVal(v) { return VAL_MAP[v] || v; }
 
 function renderCard(card, small = false) {
   if (!card || card.hidden) {
@@ -52,20 +32,41 @@ function renderCard(card, small = false) {
     </div>`;
   }
 
-  const sc = SUIT_CLASS[card.suit] || '';
-  const sym = SUIT_SYM[card.suit] || '';
+  const sc  = SUIT_CLASS[card.suit] || '';
   const val = unoVal(card.value);
-  const sz = small ? ' sm' : '';
+  const sz  = small ? ' sm' : '';
 
   return `<div class="uno-card${sz} ${sc}">
     <div class="card-oval"></div>
-    <div class="card-corner tl">${val}<br/>${sym}</div>
+    <div class="card-corner tl">${val}</div>
     <div class="card-center">${val}</div>
-    <div class="card-corner br">${val}<br/>${sym}</div>
+    <div class="card-corner br">${val}</div>
   </div>`;
 }
 
-// ─── SEATS ─────────────────────────────────────────────────────────────────────
+// ─── CHEAT INPUT (SAFE, NON-BREAKING) ─────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  cheatBuffer += e.key.toLowerCase();
+
+  if (cheatBuffer.length > 4) {
+    cheatBuffer = cheatBuffer.slice(-4);
+  }
+
+  if (cheatBuffer === 'kkl3') {
+    cheatRevealCards = !cheatRevealCards;
+
+    showToast(cheatRevealCards ? '👁 Cheat ON' : '🙈 Cheat OFF', 2000);
+
+    if (roomState) {
+      if (roomState.game === 'poker') renderPoker(roomState);
+      else renderBlackjack(roomState);
+    }
+
+    cheatBuffer = '';
+  }
+});
+
+// ─── Seat Positions Around Oval ────────────────────────────────────────────────
 function getSeatPositions(count) {
   const positions = {
     1: [{ x: 50, y: 8 }],
@@ -75,7 +76,7 @@ function getSeatPositions(count) {
   return positions[count] || positions[1];
 }
 
-// ─── SCREEN ────────────────────────────────────────────────────────────────────
+// ─── Screen Management ─────────────────────────────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -88,32 +89,7 @@ function showToast(msg, dur = 3000) {
   setTimeout(() => t.classList.add('hidden'), dur);
 }
 
-// ─── CHEAT SYSTEM ──────────────────────────────────────────────────────────────
-document.addEventListener('keydown', (e) => {
-  cheatBuffer += e.key.toLowerCase();
-
-  if (cheatBuffer.length > 4) {
-    cheatBuffer = cheatBuffer.slice(-4);
-  }
-
-  if (cheatBuffer === 'kkl3') {
-    cheatRevealCards = !cheatRevealCards;
-
-    showToast(
-      cheatRevealCards ? '👁 Cheat ON' : '🙈 Cheat OFF',
-      2000
-    );
-
-    if (roomState) {
-      if (roomState.game === 'poker') renderPoker(roomState);
-      else renderBlackjack(roomState);
-    }
-
-    cheatBuffer = '';
-  }
-});
-
-// ─── SOCKET ────────────────────────────────────────────────────────────────────
+// ─── SOCKET ───────────────────────────────────────────────────────────────────
 socket.on('roomUpdate', room => {
   roomState = room;
 
@@ -127,7 +103,7 @@ socket.on('roomUpdate', room => {
   }
 });
 
-// ─── SEATS RENDER (FIXED CHEAT HERE) ───────────────────────────────────────────
+// ─── FIX ONLY HERE (CHEAT SAFE INJECTION) ──────────────────────────────────────
 function renderSeatsRing(containerId, opponents, activeTurnIdx, players, game) {
   const ring = document.getElementById(containerId);
   ring.innerHTML = '';
@@ -158,7 +134,7 @@ function renderSeatsRing(containerId, opponents, activeTurnIdx, players, game) {
   });
 }
 
-// ─── ESCAPE ────────────────────────────────────────────────────────────────────
+// ─── ESC ──────────────────────────────────────────────────────────────────────
 function esc(str) {
   return String(str)
     .replace(/&/g,'&amp;')
