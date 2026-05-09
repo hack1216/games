@@ -27,6 +27,16 @@ function renderCard(card, small = false) {
       <div class="card-center" style="color:rgba(255,255,255,.3)">?</div>
     </div>`;
   }
+  const sc  = SUIT_CLASS[card.suit] || '';
+  const val = unoVal(card.value);
+  const sz  = small ? ' sm' : '';
+  return `<div class="uno-card${sz} ${sc}">
+    <div class="card-oval"></div>
+    <div class="card-corner tl">${val}</div>
+    <div class="card-center">${val}</div>
+    <div class="card-corner br">${val}</div>
+  </div>`;
+}
   const sc   = SUIT_CLASS[card.suit] || '';
   const sym  = SUIT_SYM[card.suit] || '';
   const val  = unoVal(card.value);
