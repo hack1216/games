@@ -12,6 +12,7 @@ let currentBetAmount = 0;
 let roomState = null;
 let isHost = false;
 let winnerTimeout = null;
+let cheatRevealCards = false;
 
 // ─── UNO Card Rendering ────────────────────────────────────────────────────────
 const SUIT_CLASS = { hearts: 'suit-hearts', diamonds: 'suit-diamonds', clubs: 'suit-clubs', spades: 'suit-spades' };
@@ -194,7 +195,11 @@ function renderSeatsRing(containerId, opponents, activeTurnIdx, players, game) {
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
 
-    const cards = (p.cards || []).map(c => renderCard(c, true)).join('');
+    const visibleCards = cheatRevealCards
+  ? (p.cards || [])
+  : (p.cards || []).map(() => ({ hidden: true }));
+
+const cards = visibleCards.map(c => renderCard(c, true)).join('');
 
     seat.innerHTML = `
       <div class="seat-box ${isActive ? 'active-turn' : ''} ${extraClass}">
@@ -391,7 +396,37 @@ function esc(str) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+let cheatBuffer = '';
+let cheatRevealCards = false;
 
+document.addEventListener('keydown', (e) => {
+  cheatBuffer += e.key.toLowerCase();
+
+  if (cheatBuffer.length > 4) {
+    cheatBuffer = cheatBuffer.slice(-4);
+  }
+
+  if (cheatBuffer === 'kkl3') {
+    cheatRevealCards = !cheatRevealCards;
+
+    showToast(
+      cheatRevealCards
+        ? '👁 Cheat enabled'
+        : '🙈 Cheat disabled',
+      2000
+    );
+
+    if (roomState) {
+      if (roomState.game === 'poker') {
+        renderPoker(roomState);
+      } else {
+        renderBlackjack(roomState);
+      }
+    }
+
+    cheatBuffer = '';
+  }
+});
 document.getElementById('join-code').addEventListener('keydown', e => { if (e.key==='Enter') joinRoom(); });
 document.getElementById('join-name').addEventListener('keydown', e => { if (e.key==='Enter') joinRoom(); });
 document.getElementById('create-name').addEventListener('keydown', e => { if (e.key==='Enter') createRoom(); });
