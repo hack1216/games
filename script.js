@@ -89,7 +89,8 @@ function joinRoom() {
   socket.emit('joinRoom', { name, code });
 }
 
-function addBots()   { socket.emit('addBots',   { code: myRoomCode }); }
+function addBots() { socket.emit('addBots', { code: myRoomCode }); }
+
 function startGame() {
   if (!roomState || roomState.players.length < 2) { showToast('Need at least 2 players'); return; }
   socket.emit('startGame', { code: myRoomCode });
@@ -164,22 +165,21 @@ function renderSeatsRing(containerId, opponents, activeTurnIdx, players, game, r
     let extraClass = '';
 
     if (game === 'poker') {
-      if (p.folded)     { statusText = 'Folded';      extraClass = 'folded'; }
-      else if (p.allIn)   statusText = '🔥 All In';
-      else                statusText = `Bet: ${p.totalBet || 0}`;
+      if (p.folded)        { statusText = 'Folded';     extraClass = 'folded'; }
+      else if (p.allIn)      statusText = '🔥 All In';
+      else                   statusText = `Bet: ${p.totalBet || 0}`;
     } else {
-      if (p.busted)       { statusText = '💥 Bust';   extraClass = 'busted'; }
-      else if (p.standing)  statusText = '✋ Stand';
-      else if (p.result)  { statusText = p.result.toUpperCase(); extraClass = `result-${p.result}`; }
-      else                  statusText = p.bet > 0 ? `Bet: ${p.bet}` : '';
+      if (p.busted)        { statusText = '💥 Bust';    extraClass = 'busted'; }
+      else if (p.standing)   statusText = '✋ Stand';
+      else if (p.result)   { statusText = p.result.toUpperCase(); extraClass = `result-${p.result}`; }
+      else                   statusText = p.bet > 0 ? `Bet: ${p.bet}` : '';
     }
 
     const scoreOrChips = game === 'blackjack' && p.blackjackScore > 0
       ? `Score: ${p.blackjackScore}`
       : `💰 ${p.chips}`;
 
-    const cardList = (p.cards || []);
-    const cards = cardList.map(c => renderCard(revealCards ? c : { hidden: true }, true)).join('');
+    const cards = (p.cards || []).map(c => renderCard(revealCards ? c : { hidden: true }, true)).join('');
 
     const seat = document.createElement('div');
     seat.className = 'seat';
@@ -232,7 +232,7 @@ function renderPoker(room) {
     indicator.style.cssText = 'position:fixed;top:10px;right:12px;background:rgba(231,76,60,.85);color:#fff;padding:4px 10px;border-radius:8px;font-size:.75rem;font-weight:700;z-index:500;letter-spacing:1px';
     document.body.appendChild(indicator);
   }
-  indicator.textContent  = cheatMode ? '👁 CHEAT ON' : '';
+  indicator.textContent   = cheatMode ? '👁 CHEAT ON' : '';
   indicator.style.display = cheatMode ? 'block' : 'none';
 
   const actions  = document.getElementById('poker-actions');
@@ -381,8 +381,17 @@ function bjAction(type) {
   if (type === 'stand') socket.emit('blackjack:stand', { code: myRoomCode });
 }
 
+// ─── Utils ─────────────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 // ─── Cheat Code ────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
+  const tag = e.target.tagName.toLowerCase();
+  if (tag === 'input' || tag === 'textarea') return;
   cheatBuffer += e.key.toLowerCase();
   if (cheatBuffer.length > 4) cheatBuffer = cheatBuffer.slice(-4);
   if (cheatBuffer === 'kkl3') {
@@ -393,7 +402,9 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ─── Input shortcuts ───────────────────────────────────────────────────────────
-document.getElementById('join-code').addEventListener('keydown',    e => { if (e.key === 'Enter') joinRoom(); });
-document.getElementById('join-name').addEventListener('keydown',    e => { if (e.key === 'Enter') joinRoom(); });
-document.getElementById('create-name').addEventListener('keydown',  e => { if (e.key === 'Enter') createRoom(); });
+// ─── DOM Ready ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('join-code').addEventListener('keydown',   e => { if (e.key === 'Enter') joinRoom(); });
+  document.getElementById('join-name').addEventListener('keydown',   e => { if (e.key === 'Enter') joinRoom(); });
+  document.getElementById('create-name').addEventListener('keydown', e => { if (e.key === 'Enter') createRoom(); });
+});
