@@ -37,17 +37,7 @@ function renderCard(card, small = false) {
     <div class="card-corner br">${val}</div>
   </div>`;
 }
-  const sc   = SUIT_CLASS[card.suit] || '';
-  const sym  = SUIT_SYM[card.suit] || '';
-  const val  = unoVal(card.value);
-  const sz   = small ? ' sm' : '';
-  return `<div class="uno-card${sz} ${sc}">
-    <div class="card-oval"></div>
-    <div class="card-corner tl">${val}<br/>${sym}</div>
-    <div class="card-center">${val}</div>
-    <div class="card-corner br">${val}<br/>${sym}</div>
-  </div>`;
-}
+
 
 // ─── Seat Positions Around Oval ────────────────────────────────────────────────
 // Returns {left, top} in % for seats around an ellipse
